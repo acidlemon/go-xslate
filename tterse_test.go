@@ -401,6 +401,17 @@ func TestTTerse_WrapperWithVars(t *testing.T) {
 	c.renderAndCompare(tx, "wrapper/index.tx", Vars{"name": "Bob"}, "Hello World Bob! Hello, Hello! Hello World Bob!")
 }
 
+func TestTTerse_WrapperAndForeach(t *testing.T) {
+	c := newTestCtx(t)
+	defer c.Cleanup()
+
+	c.File("wrapper/index.tx").WriteString(`[% WRAPPER "wrapper/wrapper.tx" %][% greeting %] [% FOREACH item IN names %][% item %], [% END %][% END %]`)
+	c.File("wrapper/wrapper.tx").WriteString(`Hello World! [% content %]Hello World!`)
+
+	tx := c.CreateTx()
+	c.renderAndCompare(tx, "wrapper/index.tx", Vars{"names": []string{"Bob", "Freddie"}, "greeting": "Hi!"}, "Hello World! Hi! Bob, Freddie, Hello World!")
+}
+
 func TestTTerse_RenderInto(t *testing.T) {
 	c := newTestCtx(t)
 	defer c.Cleanup()
